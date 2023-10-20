@@ -48,10 +48,7 @@ async function createUser(req,res){
 
       if (!(firstName && lastName && email)) return res.send('Missing some user datas. User needs : firstName, lastName and email')
       
-      //Looks for an user that has the same email into the database
-      const duplicate = await User.findOne({email: email}).exec();
-      if (duplicate) return res.send('The email is already registered.')
-
+     
 
       const result = await User.create({
         "firstName": firstName,
@@ -69,9 +66,15 @@ async function createUser(req,res){
          Email: ${email}`
         );
     } catch(err){
-      return res.status(500).send(`message: ${err.message}`)
+      if (err.code == 11000){
+        return res.status(409).send(`User with the email ${err.keyValue.email} already exists`)
+      }
+
+      return res.status(409).send(`message: ${err.message}`)
     }
   }
+
+  
 async function updateUser(req,res){
     try{
       
