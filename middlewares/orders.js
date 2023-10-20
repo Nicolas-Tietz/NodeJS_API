@@ -30,8 +30,8 @@ async function addOrder(req,res){
             
             if (Object.keys(product)[0] != 'product' ) return res.status(400).send('Product must have only the following field: product')
             
-
-            const result = await Product.findOne({name: product.product}).exec()
+            console.log(product)
+            const result = await Product.findOne({product: product.product}).exec()
 
             if (!result)  return res.status(400).send(`Query failed. The ${product.product} product doesnt exist.`)
 
