@@ -4,14 +4,35 @@ const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
     products:[
-        {type:mongoose.Schema.Types.ObjectId, ref:'Product'}
+        {
+            product:{
+                type: String,
+                required: true,
+                
+            },
+            _id: false
+        }
     ]
          
     ,
     users:[
-        {type:mongoose.Schema.Types.ObjectId, ref:'User'}
+        {
+            firstName:{
+                type: String,
+                required: true
+            },
+            lastName:{
+                type: String,
+                required: true
+            },
+            email:{
+                type: String,
+                required: true
+            },
+            _id: false
+        }
     ],
-    date: new Date()
+    date:{ type: Date , required: true, default: Date.now}
 })
 
 
