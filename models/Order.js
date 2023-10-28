@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const orderSchema = new Schema({
     products:[
         {
-            product:{
+            name:{
                 type: String,
                 required: true,
                 
@@ -17,14 +17,7 @@ const orderSchema = new Schema({
     ,
     users:[
         {
-            firstName:{
-                type: String,
-                required: true
-            },
-            lastName:{
-                type: String,
-                required: true
-            },
+            
             email:{
                 type: String,
                 required: true
