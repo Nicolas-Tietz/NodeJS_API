@@ -6,7 +6,7 @@ const {
   addOrder,
   deleteOrder,
   updateOrder,
-  listOrders
+  filter
 } = require('../middlewares/orders')
 
 router.use(express.json())
@@ -15,7 +15,9 @@ router.use(express.json())
 //Bisogna creare i controllers dei products
 
 
-router.get('/',listOrders)
+router.get('/',filter)
+
+
 router.post('/',addOrder)
   
   //Aggiungere sorting?
