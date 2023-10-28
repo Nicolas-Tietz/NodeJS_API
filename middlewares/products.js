@@ -1,5 +1,5 @@
 const Product = require('../models/Product')
-
+const Order = require('../models/Order')
 async function listProducts(req,res){
     const allProducts = await Product.find().exec();
     res.send(allProducts)
@@ -7,13 +7,13 @@ async function listProducts(req,res){
 
 async function addProduct(req,res){
     try{
+        if (Object.keys(req.body).length != 1 || (Object.keys(req.body)[0] != 'name') ) return res.status(400).send('Product requires one field: name')
+        const productName = req.body.name
         
-        const productName = req.body.product
         
-        if (Object.keys(req.body).length != 1 || (Object.keys(req.body)[0] != 'product') ) return res.status(400).send('Product requires one field: product')
         
         const result = await Product.create({
-            "product": productName
+            "name": productName
             
         })
         if (result) res.json(result)
@@ -22,7 +22,7 @@ async function addProduct(req,res){
     } catch(err){
 
         if (err.code == 11000){
-            return res.status(409).send(`Product with the name ${err.keyValue.product} already exists`)
+            return console.error(err)
           }
     
           return res.status(409).send(`message: ${err.message}`)
@@ -36,7 +36,7 @@ async function deleteProduct(req,res){
         if (!product) return res.send('Product doesnt exists')
         const result = await Product.deleteOne({_id: req.params.id}).exec()
         if (result.acknowledged == true){
-            res.status(200).send(`Product ${product.product} Deleted Successfully`)
+            res.status(200).send(`Product ${product.name} Deleted Successfully`)
 
         }else{
             res.status(400).send('Something went wrong during the product deletion')
@@ -48,23 +48,38 @@ async function deleteProduct(req,res){
 
 async function updateProduct(req,res){
     try{
-        const productName = req.body.product
-        
+        const productName = req.body.name
+        let preUpdateProduct;
+
         if (req.body.length == 0 || req.body.length >= 2 ) return res.send('Operation cancelled. Body has 1 field.')
         
+        
+
         for (const elem in req.body){
-            if (elem != 'product'){
+            if (elem != 'name'){
                 return res.status(400).send(
                     `There is no field called ${elem}.<br/>
-                    Fields are: name`
+                    Fields are: product`
                 )
             }
         }
-        const result = await Product.findOneAndUpdate({_id: req.params.id},{$set: {product:productName} })
+
+        preUpdateProduct = await Product.findOne({_id: req.params.id})
+
+        const result = await Product.findOneAndUpdate({_id: req.params.id},{$set: {name:productName} }, {new: true})
             
-        
-            
-        res.status(200).json(result)
+        const ordersUpdate = await Order.updateMany(
+            { "products.name": preUpdateProduct.name },
+            { $set: { "products.$[].name": req.body.name } },
+            { arrayFilters: [{ name: preUpdateProduct.name }] }
+          ).exec().then((result)=>{
+            if (result.acknowledged == true){
+              ordersUpdatedString = `Product was included in ${result.matchedCount} order/s of which ${result.modifiedCount} have been updated`
+            }
+          }
+          );
+        console.log(result)
+        res.status(200).send('Product updated : '+JSON.stringify(result)+'<br/>'+ordersUpdatedString)
             
         
     }catch (err){
@@ -79,3 +94,5 @@ module.exports = {
     updateProduct,
     listProducts
 }
+
+//Quando listo gli ordini, conteng

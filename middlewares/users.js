@@ -1,7 +1,7 @@
 
 
 const User = require('../models/User')
-
+const Order = require('../models/Order')
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 
@@ -97,16 +97,48 @@ async function updateUser(req,res){
       if (req.body.email) fieldsToUpdate.email = req.body.email
       //Fills fieldsToUpdate with only the fields and values to update.
       
-      
+      //Se viene updatata la mail dell'utente, ci ritroveremmo una mail sbagliata negli ordini creati precedentemente con l'user.
+      //Quindi in questo caso BISOGNA controllare gli ordini in cui è presente la mail ed updatarla essendo essa univoca e visto che la
+      //utilizzo per farci i fetch dei dati dell'utente.
+      let preUpdateUser;
+      if (req.body?.email){
+        preUpdateUser = await User.findOne({_id: req.params.id})
+        
+      }
       
       const result = await User.updateOne({ _id: req.params.id },{ $set: fieldsToUpdate}).exec()
       console.log(
         `${result.matchedCount} document(s) matched the filter, updated ${result.modifiedCount} document(s)`,
       );
+      let ordersUpdatedString = ''
+      //If the email gets updated, update also all orders that contain it
+      if (result.modifiedCount == 1 && req.body?.email){
+        if (req.body.email != preUpdateUser.email){
+          //NON FUNZIONA FIXARE
+          console.log('Pre',preUpdateUser.email)
+          console.log('Post',req.body.email)
+          const ordersUpdate = await Order.updateMany(
+            { "users.email": preUpdateUser.email },
+            { $set: { "users.$[].email": req.body.email } },
+            { arrayFilters: [{ email: preUpdateUser.email }] }
+          ).exec().then((result)=>{
+            if (result.acknowledged == true){
+              ordersUpdatedString = `User was included in ${result.matchedCount} order/s of which ${result.modifiedCount} have been updated`
+            }
+          }
+          );
+
+
+
+          
+        }
+      }
       
-      res.send('User Updated')
+      
+      res.status(200).send('User Updated. '+ ordersUpdatedString)
 
     } catch(err){
+        console.log(err)
         return res.status(500).send(`message: ${err.message}`)
     }
   }
