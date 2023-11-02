@@ -14,7 +14,9 @@ const userSchema = new Schema({
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    lowercase: true
+    
   }
 })
 
@@ -23,4 +25,5 @@ const userSchema = new Schema({
 
 //By default when mongo creates this model, will set the mongoose.model('User') to lowercase and plural so it will look for an 'users' collection in mongodb
 module.exports = mongoose.model('User',userSchema)
+
 
