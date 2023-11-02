@@ -2,7 +2,7 @@
 
 const User = require('../models/User')
 const Order = require('../models/Order')
-
+const validator = require('email-validator')
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 
 
@@ -48,7 +48,7 @@ async function createUser(req,res){
 
       if (!(firstName && lastName && email)) return res.send('Missing some user datas. User needs : firstName, lastName and email')
       
-     
+      if (!validator.validate(email)) return res.status(400).send(`The email ${email} is invalid. Insert a real one`)
 
       const result = await User.create({
         "firstName": firstName,
@@ -80,7 +80,9 @@ async function updateUser(req,res){
       
       const userInfos = ['firstName','lastName','email']
 
-      if (Object.keys(req.body).length == 0) return res.send('Operation cancelled. Body is empty.')
+      if (!validator.validate(req.body.email)) return res.status(400).send(`The email ${req.body.email} is invalid. Insert a real one`)
+
+      if (Object.keys(req.body).length == 0) return res.status(400).send('Operation cancelled. Body is empty.')
       console.log(req.body)
       
       for (const elem in req.body){
@@ -139,6 +141,7 @@ async function updateUser(req,res){
 
     } catch(err){
         console.log(err)
+        if (err.code == 11000) return res.status(400).send('An User with this email already exists.')
         return res.status(500).send(`message: ${err.message}`)
     }
   }
