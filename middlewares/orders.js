@@ -137,7 +137,7 @@ async function updateOrder(req,res){
             return res.status(400).send('Order Update must contain at least one add/remove operation of an user/product')
         }
         
-
+        const actualOrder = await Order.findOne({_id:req.params.id})
 
         console.log('Prima')
         if (users && users.length){
@@ -170,6 +170,8 @@ async function updateOrder(req,res){
                 const userExist = await User.findOne({email:user.email})
                 
                 if (!userExist) return res.status(400).send(`Operation failed. User ${user.email} doesnt exists`)
+
+                
             
                 const tempObj = {}
                 tempObj['email'] = user.email
@@ -185,6 +187,13 @@ async function updateOrder(req,res){
                 console.log('pusho users')
             }
         }
+
+        if (removeUsers.length == actualOrder.users.length && addUsers.length == 0){
+            return res.status(400).send('Operation failed. You cant remove all users from an order as it must contain at least one user inside to exist.')
+        }
+
+
+
         //If products array is not empty execute
         if (products && products.length){
             
@@ -206,7 +215,7 @@ async function updateOrder(req,res){
             }
             
                 //Contiene il documento completo.
-            const actualOrder = await Order.findOne({_id:req.params.id})
+            
             
             
             const duplicateProducts = []
@@ -223,6 +232,7 @@ async function updateOrder(req,res){
                 }else if (prod.operation =='remove'){
                     if (actualOrder.products.some(p=>p.productName == prod.productName)){
                         //Prodotto da rimuove è presente nell'ordine quindi procedo
+                        if (removeProducts.some(p => p.productName == prod.productName)) return res.status(400).send(`You cant remove the same product from the order more than once. (${prod.productName})`)
                         removeProducts.push({"productName":prod.productName})
                     }else{
                         //Prodotto non presente quindi annullo
@@ -237,6 +247,13 @@ async function updateOrder(req,res){
                 return res.status(400).send(`I seguenti prodotti sono già presenti nell'ordine: ${duplicateProducts}`)
             }
             console.log(addProducts)
+
+            //Se superati tutti i test, quindi in removeProducts ci sono prodotti diversi tra loro ed esistono come prodotti e all'interno dell'ordine,
+            //removeProducts.length dovrebbe contenere il numero di prodotti validi da rimuovere. Quindi se removeProducts.length == numeroProdotti dell'ordine E addProducts è vuoto
+            //
+            if (removeProducts.length == actualOrder.products.length && addProducts.length == 0){
+                return res.status(400).send('Operation failed. You cant remove all products from an order as it must contain at least one product inside to exist.')
+            }
             
 
             //A questo punto prodToPull e prodToPush contengono gli oggetti da rimuovere
