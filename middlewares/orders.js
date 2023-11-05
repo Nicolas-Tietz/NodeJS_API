@@ -123,6 +123,7 @@ async function updateOrder(req,res){
         const addUsers = []
         const removeUsers = []
         
+        const updates = [];
         
         if (!users && !products){
             
@@ -138,9 +139,10 @@ async function updateOrder(req,res){
         
 
 
-        
+        console.log('Prima')
         if (users && users.length){
             for (const user of users){
+                
                 //If the order already contains one of the users to add, the operation stops
                 
 
@@ -155,6 +157,7 @@ async function updateOrder(req,res){
 
                 if (user.operation =='add'){
                     if (orderUsers.some(u => u.email == user.email)) return res.status(400).send(`Operation failed. User ${user.email} already exists in this order.`) 
+                    
 
                 }
                 if (user.operation =='remove'){
@@ -171,16 +174,20 @@ async function updateOrder(req,res){
                 const tempObj = {}
                 tempObj['email'] = user.email
                 if (user.operation == 'add'){
+                    //If someone tries to update an order by adding 2 times the same user email, as an user cant be present mulitple times in the same order
+                    if (addUsers.some(u => u.email == user.email)) return res.status(400).send(`You cant add more than one unique user (${user.email})`)
+
                     addUsers.push(tempObj)
                 }
                 if (user.operation == 'remove'){
                     removeUsers.push(tempObj)
                 }
+                console.log('pusho users')
             }
         }
         //If products array is not empty execute
         if (products && products.length){
-            const updates = [];
+            
 
             for (const product of products){
             
@@ -200,8 +207,7 @@ async function updateOrder(req,res){
             
                 //Contiene il documento completo.
             const actualOrder = await Order.findOne({_id:req.params.id})
-            const prodToPush = []
-            const prodToPull = []
+            
             
             const duplicateProducts = []
 
@@ -211,6 +217,7 @@ async function updateOrder(req,res){
                         duplicateProducts.push(prod.productName)
                     }else{
                         //Prodotto non presente quindi lo pusho nell'array
+                        if (addProducts.some(p => p.productName == prod.productName)) return res.status(400).send(`You cant add more than one unique product (${prod.productName})`)
                         addProducts.push({"productName":prod.productName})
                     }
                 }else if (prod.operation =='remove'){
@@ -222,20 +229,30 @@ async function updateOrder(req,res){
                         return res.status(400).send(`Il prodotto ${prod.productName} non è presente nell'ordine`)
                     }
                 }
+
+                
                 
             }
             if (duplicateProducts.length){
                 return res.status(400).send(`I seguenti prodotti sono già presenti nell'ordine: ${duplicateProducts}`)
             }
+            console.log(addProducts)
+            
 
             //A questo punto prodToPull e prodToPush contengono gli oggetti da rimuovere
 
-            const productsResult = await Order.updateOne({_id:req.params.id},{})
-            
+        }
+            const pushArrays = {
+                
+            }
+            console.log('addproducts',addProducts)
+            if (addProducts) pushArrays['products'] = addProducts
+            if (addUsers) pushArrays['users'] = addUsers
+            console.log('pusharra',pushArrays)
             const updatePush = {
                 updateOne:{
                     filter:{_id: req.params.id},
-                    update:{$push:{products: addProducts,users: addUsers} }},
+                    update:{$push: pushArrays }},
                 }
 
             const updatePull = {
@@ -252,9 +269,9 @@ async function updateOrder(req,res){
             if (!updateResult) res.status(400).send('Something went wrong during the update.')
             console.log(updateResult) 
             console.log('updates',updates)
-        }
+        
                 
-            
+        console.log('Si arriva')
 
         
                 //Da qui posso fare i controlli sul documento completo invece di fare un findOne per prendere il pezzo specifico. In questo caso me lo prendo io il product specifico da modificare per aggiungere la query poi.

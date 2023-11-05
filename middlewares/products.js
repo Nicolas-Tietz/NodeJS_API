@@ -86,7 +86,10 @@ async function updateProduct(req,res){
             
         
     }catch (err){
-        console.error(err.message)
+        if (err.code == 11000){
+            res.status(400).send('Un prodotto con questo nome esiste già.')
+        }
+        console.error(err)
     }
 
 }
