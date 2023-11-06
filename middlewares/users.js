@@ -3,14 +3,13 @@
 const User = require('../models/User')
 const Order = require('../models/Order')
 const validator = require('email-validator')
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 
 
 
 
 
 
-
+//Delete user from database
 async function deleteUser(req,res){
     try{
        
@@ -29,19 +28,15 @@ async function deleteUser(req,res){
     
 }
 
+//List all users
 async function listUsers(req,res) {
-    
 
-    
-      // Connect the client to the server (optional starting in v4.7)
-      
       const allUsers = await User.find().exec();
-
       res.send(allUsers)
    
   }
 
-  
+//Add new User to the database
 async function createUser(req,res){
     try{
       const {firstName,lastName,email} = req.body
@@ -56,7 +51,7 @@ async function createUser(req,res){
         "email": email
       })
 
-      console.log(result)
+      
 
         
       return res.send(
@@ -84,8 +79,9 @@ async function updateUser(req,res){
       if (!validator.validate(req.body.email)) return res.status(400).send(`The email ${req.body.email} is invalid. Insert a real one`)
 
       if (Object.keys(req.body).length == 0) return res.status(400).send('Operation cancelled. Body is empty.')
-      console.log(req.body)
       
+
+      //Check that fields name are the required ones
       for (const elem in req.body){
         if (!userInfos.includes(elem)){
           return res.status(400).send(
@@ -98,28 +94,21 @@ async function updateUser(req,res){
       if (req.body.firstName) fieldsToUpdate.firstName = req.body.firstName
       if (req.body.lastName) fieldsToUpdate.lastName = req.body.lastName
       if (req.body.email) fieldsToUpdate.email = req.body.email
-      //Fills fieldsToUpdate with only the fields and values to update.
-      
-      //Se viene updatata la mail dell'utente, ci ritroveremmo una mail sbagliata negli ordini creati precedentemente con l'user.
-      //Quindi in questo caso BISOGNA controllare gli ordini in cui è presente la mail ed updatarla essendo essa univoca e visto che la
-      //utilizzo per farci i fetch dei dati dell'utente.
+     
       let preUpdateUser;
+      //If the update contains a new email, this fetches the user before updating it to obtain the old email
       if (req.body?.email){
         preUpdateUser = await User.findOne({_id: req.params.id})
         
       }
       
       const result = await User.updateOne({ _id: req.params.id },{ $set: fieldsToUpdate}).exec()
-      console.log(
-        `${result.matchedCount} document(s) matched the filter, updated ${result.modifiedCount} document(s)`,
-      );
+      
       let ordersUpdatedString = ''
-      //If the email gets updated, update also all orders that contain it
       if (result.modifiedCount == 1 && req.body?.email){
+        //Updates all orders that contained the old email with the new email
         if (req.body.email != preUpdateUser.email){
-          //NON FUNZIONA FIXARE
-          console.log('Pre',preUpdateUser.email)
-          console.log('Post',req.body.email)
+          
           const ordersUpdate = await Order.updateMany(
             { "users.email": preUpdateUser.email },
             { $set: { "users.$[].email": req.body.email } },
