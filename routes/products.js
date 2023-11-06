@@ -12,19 +12,18 @@ const {
 router.use(express.json())
 
 
-//Bisogna creare i controllers dei products
 
-
+//Add new product to db
 router.post('/',addProduct)
+//List all products
 router.get('/',listProducts)
   
-  //Aggiungere sorting?
 
   
-  
+  //Update existing product
   router.patch("/:id", updateProduct)
 
-
+//Delete existing product
   router.delete("/:id",deleteProduct)
 
 

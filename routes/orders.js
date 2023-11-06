@@ -12,21 +12,21 @@ const {
 router.use(express.json())
 
 
-//Bisogna creare i controllers dei products
 
 
+//Filter order by date and/or products
 router.get('/',filter)
 
-
+//Add new order to db
 router.post('/',addOrder)
   
-  //Aggiungere sorting?
+ 
 
   
-  
+//Update existing order
   router.patch("/:id", updateOrder)
 
-
+//Delete existing order
   router.delete("/:id",deleteOrder)
 
 

@@ -14,16 +14,16 @@ router.use(express.json())
 
   
 
-
+//Add new user to db
 router.post('/',createUser)
   
-  //Aggiungere sorting?
+//List all users
   router.get("/",listUsers)
   
-  
+  //Update existing user
   router.patch("/:id", updateUser)
 
-
+//Delete existing user
   router.delete("/:id",deleteUser)
 
 
