@@ -5,14 +5,14 @@
 ![NODEJS](https://img.shields.io/badge/NODE_JS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 
 
-This project is about creating a backend for a Travel Company that allows to interact with a MongoDB Database.
+This project consists of a backend for a Travel Company that allows to interact with a MongoDB Database.
 
 ### The Database contains collections for:
 - Users
 - Products
 - Orders
 
-## How to Install
+## How to Clone
 
 1. Clone the repository:  
 
@@ -224,14 +224,17 @@ DELETE localhost:8000/products/:id
 ```
 GET localhost:8000/orders/
 ```
-#### Filter Orders
+
+### Filter Orders
+
+Orders can be filtered by products contained and/or users
 
 
 #### Example
 
-(Orders can be filtered by products contained and/or users)
+
 ```
-GET localhost:8000/orders?date=yyyy-mm-dd&products=ProductName1,ProductName2
+GET localhost:8000/orders?date=2023-11-01&products=ProductName1,ProductName2
 ```
 
 ### Create Order
