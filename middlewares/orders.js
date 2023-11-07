@@ -118,6 +118,7 @@ async function updateOrder(req,res){
         
         const actualOrder = await Order.findOne({_id:req.params.id})
 
+        //Check if fields of users from the body are valid
         if (users && users.length){
             for (const user of users){
                 if (Object.keys(user).length != 2) return res.status(400).send('Fields must be 2: product and operation (add or remove)')
@@ -153,7 +154,7 @@ async function updateOrder(req,res){
         if (removeUsers.length == actualOrder.users.length && addUsers.length == 0){
             return res.status(400).send('Operation failed. You cant remove all users from an order as it must contain at least one user inside to exist.')
         }
-
+        //Check if fields of products from the body are valid
         if (products && products.length){
             for (const product of products){
             
@@ -172,7 +173,6 @@ async function updateOrder(req,res){
             
             const duplicateProducts = []
 
-            
             for(const prod of products){
                 //Checks if products to add already exist in the order
                 if (prod.operation == 'add'){
@@ -184,21 +184,18 @@ async function updateOrder(req,res){
                         addProducts.push({"productName":prod.productName})
                     }
 
-                //Check if products to remove exist in the order to be able to remove them
+                //Check if products to remove exist in the order before proceeding
                 }else if (prod.operation =='remove'){
                     if (actualOrder.products.some(p=>p.productName == prod.productName)){
-                        
                         if (removeProducts.some(p => p.productName == prod.productName)) return res.status(400).send(`You cant remove the same product from the order more than once. (${prod.productName})`)
                         removeProducts.push({"productName":prod.productName})
                     }else{
                        
                         return res.status(400).send(`The product ${prod.productName} doesnt exist in the order`)
                     }
-                }
-
-                
-                
+                }   
             }
+            
             if (duplicateProducts.length){
                 return res.status(400).send(`The following products already exist in the order: ${duplicateProducts}`)
             }
@@ -266,58 +263,46 @@ function isValidDate(dateString) {
 //Return orders filtered by date/products
 async function filter(req,res){
     try{
+
         const searchParams = new URLSearchParams(req.query)
-        
-        
-    
+
         if (Object.keys(req.query).length == 0){
             const allOrders = await Order.find().exec();
             return res.send(allOrders) 
         }
         
-
         const filtersAvailable =['date','products']
-        
-        
         
         for (const [key,value] of searchParams){
             if (!filtersAvailable.includes(key)){
                 return res.status(400).send(`The ${key} doesn't exists as a filter parameter. Actual parameters are: ${filtersAvailable}`)
             }
         }
+
+        const filter = {}
+
+        const dateParam  = searchParams.get("date")
+        if (dateParam){
+            const date = new Date(req.query.date)
+            if (!isValidDate(date)) return res.status(400).send('Date is not valid. Format should be yyyy-mm-dd')
+            filter['date'] =  {$gte: date}
+
+        }
         
         
-        const date = new Date(req.query.date)
-        if (!isValidDate(date)) return res.status(400).send('Date is not valid. Format should be yyyy-mm-dd')
 
         const productsString  = searchParams.get("products")
+        
 
-        const filter = {
-            "date" : {$gte: date},
-            
-        }
         if (productsString != null){
             filter['products.productName'] = []
         }
         
-       
-
-
-        
-        
-        
-        
-        
         if (productsString != null){
             const products = productsString.split(',')
-            //FIXARE QUI
+            
             filter['products.productName'] = {$all: products}
-            
-            
-            //Creare arrayFilter
-            
-            
-            
+ 
         }
         
         
