@@ -15,9 +15,8 @@ const port = 8000;
 
 app.set('view engine','ejs'); 
 
-
+//Connects to the database, function is contained in dbConnection.js
 connectDB()
-
 
 const usersRouter = require('./routes/users');
 const ordersRouter = require('./routes/orders');
