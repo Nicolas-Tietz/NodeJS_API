@@ -22,7 +22,7 @@ async function addProduct(req,res){
     } catch(err){
 
         if (err.code == 11000){
-            return console.error(err)
+            return res.status(400).send('Product already exists in database')
           }
     
           return res.status(409).send(`message: ${err.message}`)
@@ -54,7 +54,7 @@ async function updateProduct(req,res){
         let preUpdateProduct;
         let ordersUpdatedString = ''
 
-        if (req.body.length != 1) return res.send('Operation cancelled. Body has 1 field.')
+        if (Object.keys(req.body).length != 1) return res.send('Operation cancelled. Body has 1 field.')
         
         
 
@@ -91,7 +91,7 @@ async function updateProduct(req,res){
         
     }catch (err){
         if (err.code == 11000){
-            res.status(400).send('Un prodotto con questo nome esiste già.')
+            return res.status(400).send('Un prodotto con questo nome esiste già.')
         }
         console.error(err)
     }

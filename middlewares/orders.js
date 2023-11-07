@@ -192,7 +192,7 @@ async function updateOrder(req,res){
                         removeProducts.push({"productName":prod.productName})
                     }else{
                        
-                        return res.status(400).send(`Il prodotto ${prod.productName} non è presente nell'ordine`)
+                        return res.status(400).send(`The product ${prod.productName} doesnt exist in the order`)
                     }
                 }
 
@@ -200,7 +200,7 @@ async function updateOrder(req,res){
                 
             }
             if (duplicateProducts.length){
-                return res.status(400).send(`I seguenti prodotti sono già presenti nell'ordine: ${duplicateProducts}`)
+                return res.status(400).send(`The following products already exist in the order: ${duplicateProducts}`)
             }
 
             
