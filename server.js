@@ -22,11 +22,12 @@ const usersRouter = require('./routes/users');
 const ordersRouter = require('./routes/orders');
 const productsRouter = require('./routes/products');
 
+const notFoundRouter = require('./routes/notFound')
 
 app.use('/users',usersRouter)
 app.use('/products',productsRouter)
 app.use('/orders',ordersRouter)
-
+app.use(notFoundRouter)
 
 mongoose.connection.once('open', ()=>{
   console.log('Connected to MongoDB');
