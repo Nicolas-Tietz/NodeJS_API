@@ -4,7 +4,7 @@ const User = require('../models/User')
 const Order = require('../models/Order')
 const validator = require('email-validator')
 
-
+const mongoose = require('mongoose')
 
 
 
@@ -12,9 +12,10 @@ const validator = require('email-validator')
 //Delete user from database
 async function deleteUser(req,res){
     try{
-       
-       const uid = await User.findOne({ _id : req.params.id })
-       if (!uid) return res.send('User Doesnt Exist')
+       if(!mongoose.isValidObjectId(req.params.id)) return res.status(400).send('Invalid ObjectId')
+
+       const userFetch = await User.findOne({ _id : req.params.id })
+       if (!userFetch) return res.status(400).send('User with this ObjectId doesnt Exist')
        const result = await User.deleteOne({ _id: req.params.id }).exec()
        if (result.acknowledged == true){
         res.send('User Deleted Successfully')
@@ -73,7 +74,11 @@ async function createUser(req,res){
 
 async function updateUser(req,res){
     try{
-      
+      if(!mongoose.isValidObjectId(req.params.id)) return res.status(400).send('Invalid ObjectId')
+
+      const userFetch = await User.findOne({ _id : req.params.id })
+      if (!userFetch) return res.status(400).send('User with this ObjectId doesnt Exist')
+
       const userInfos = ['firstName','lastName','email']
 
       if (!validator.validate(req.body.email)) return res.status(400).send(`The email ${req.body.email} is invalid. Insert a real one`)

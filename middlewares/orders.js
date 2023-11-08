@@ -70,9 +70,9 @@ async function addOrder(req,res){
 //Delete one Order from database
 async function deleteOrder(req,res){
     try{
-
+        if(!mongoose.isValidObjectId(req.params.id)) return res.status(400).send('Invalid ObjectId')
         const orderId = await Order.findOne({ _id : req.params.id})
-        if (!orderId) return res.send('Order doesnt exist')
+        if (!orderId) return res.status(400).send('Order with this ObjectId doesnt exist')
         const result = await Order.deleteOne({ _id : req.params.id}).exec()
         if (result.acknowledged == true){
             res.send('Order Deleted Successfully')
@@ -88,12 +88,17 @@ async function deleteOrder(req,res){
 //Updates an order by adding/removing users/products
 async function updateOrder(req,res){
     
-    const productFields = ['productName','operation']
-    const userFields = ['email','operation']
+    
     try{
 
+        const productFields = ['productName','operation']
+        const userFields = ['email','operation']
+
+        if(!mongoose.isValidObjectId(req.params.id)) return res.status(400).send('Invalid ObjectId')
+        
         const orderDoc = await Order.findOne({_id:req.params.id})
-        if (!orderDoc) return res.status(400).send('Order not found.') 
+        
+        if (!orderDoc) return res.status(400).send('Order with this ObjectId doesnt exist.') 
    
         const {products: orderProducts,users: orderUsers} = orderDoc
         
@@ -108,17 +113,14 @@ async function updateOrder(req,res){
         //updates will contain the push and pull updates for both users and products
         const updates = [];
         
-        if (!users && !products){
-            return res.status(400).send("To update an order you must add/remove at least one user/product")        
-        } 
+        if (!users && !products) return res.status(400).send("To update an order you must add/remove at least one user/product")        
+        
        
-        if ((users && !users.length) || (products && !products.length)){
-            return res.status(400).send('Order Update must contain at least one add/remove operation of an user/product')
-        }
+        if ((users && !users.length) || (products && !products.length)) return res.status(400).send('Order Update must contain at least one add/remove operation of an user/product')
         
         const actualOrder = await Order.findOne({_id:req.params.id})
 
-        //Check if fields of users from the body are valid
+        //Check if all fields and values of users from the body are valid
         if (users && users.length){
             for (const user of users){
                 if (Object.keys(user).length != 2) return res.status(400).send('Fields must be 2: product and operation (add or remove)')
@@ -138,12 +140,12 @@ async function updateOrder(req,res){
  
                 const tempObj = {}
                 tempObj['email'] = user.email
-                if (user.operation == 'add'){
-               
-                    if (addUsers.some(u => u.email == user.email)) return res.status(400).send(`You cant add more than one unique user (${user.email})`)
 
+                if (user.operation == 'add'){
+                    if (addUsers.some(u => u.email == user.email)) return res.status(400).send(`You cant add more than one unique user (${user.email})`)
                     addUsers.push(tempObj)
                 }
+
                 if (user.operation == 'remove'){
                     removeUsers.push(tempObj)
                 }
@@ -154,6 +156,7 @@ async function updateOrder(req,res){
         if (removeUsers.length == actualOrder.users.length && addUsers.length == 0){
             return res.status(400).send('Operation failed. You cant remove all users from an order as it must contain at least one user inside to exist.')
         }
+
         //Check if fields of products from the body are valid
         if (products && products.length){
             for (const product of products){
@@ -170,13 +173,13 @@ async function updateOrder(req,res){
 
                 
             }
-            
+
             const duplicateProducts = []
 
             for(const prod of products){
                 //Checks if products to add already exist in the order
                 if (prod.operation == 'add'){
-                    if (actualOrder.products.some(p=>p.productName == prod.productName)){
+                    if (orderProducts.some(p=>p.productName == prod.productName)){
                         duplicateProducts.push(prod.productName)
                     }else{
                         
@@ -186,7 +189,7 @@ async function updateOrder(req,res){
 
                 //Check if products to remove exist in the order before proceeding
                 }else if (prod.operation =='remove'){
-                    if (actualOrder.products.some(p=>p.productName == prod.productName)){
+                    if (orderProducts.some(p=>p.productName == prod.productName)){
                         if (removeProducts.some(p => p.productName == prod.productName)) return res.status(400).send(`You cant remove the same product from the order more than once. (${prod.productName})`)
                         removeProducts.push({"productName":prod.productName})
                     }else{
@@ -201,7 +204,7 @@ async function updateOrder(req,res){
             }
 
             
-            if (removeProducts.length == actualOrder.products.length && addProducts.length == 0){
+            if (removeProducts.length == orderProducts.length && addProducts.length == 0){
                 return res.status(400).send('Operation failed. You cant remove all products from an order as it must contain at least one product inside to exist.')
             }
 

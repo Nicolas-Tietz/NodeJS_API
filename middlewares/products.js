@@ -1,5 +1,6 @@
 const Product = require('../models/Product')
 const Order = require('../models/Order')
+const mongoose = require('mongoose')
 async function listProducts(req,res){
     const allProducts = await Product.find().exec();
     res.send(allProducts)
@@ -33,8 +34,10 @@ async function addProduct(req,res){
 //Delete product from database
 async function deleteProduct(req,res){
     try{
+        if(!mongoose.isValidObjectId(req.params.id)) return res.status(400).send('Invalid ObjectId')
         const product = await Product.findOne({_id : req.params.id})
-        if (!product) return res.send('Product doesnt exists')
+        console.log(product)
+        if (!product) return res.status(400).send('Product with this ObjectId doesnt exist')
         const result = await Product.deleteOne({_id: req.params.id}).exec()
         if (result.acknowledged == true){
             res.status(200).send(`Product ${product.productName} Deleted Successfully`)
@@ -50,6 +53,10 @@ async function deleteProduct(req,res){
 //Update a product that exist in database
 async function updateProduct(req,res){
     try{
+
+        if(!mongoose.isValidObjectId(req.params.id)) return res.status(400).send('Invalid ObjectId')
+        const product = await Product.findOne({_id : req.params.id})
+        if (!product) return res.status(400).send('Product with this ObjectId doesnt exist')
         const productName = req.body.productName
         let preUpdateProduct;
         let ordersUpdatedString = ''
