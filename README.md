@@ -3,7 +3,8 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
 ![JS](https://img.shields.io/badge/JAVASCRIPT-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![NODEJS](https://img.shields.io/badge/NODE_JS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-
+![EXPRESS.JS](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
+![Insomnia](https://img.shields.io/badge/Insomnia-black?style=for-the-badge&logo=insomnia&logoColor=5849BE)
 
 This project consists of a backend for a Travel Company that allows to interact with a MongoDB Database.
 
@@ -311,3 +312,10 @@ To add new products or users they must already exist in the database.
 ```
 DELETE localhost:8000/orders/:id
 ```
+
+
+## <img src="https://github.com/Nicolas-Tietz/JavascriptAdvancedProject/assets/120263952/1a97ff89-6048-4f5c-85ac-df77f18c8578" width='25px'> Contact
+
+From <a href="https://nicolas-tietz.github.io/contact-me/">Portfolio Website</a>
+
+or Email : nicolastietz48@gmail.com
