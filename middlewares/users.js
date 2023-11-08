@@ -135,7 +135,7 @@ async function updateUser(req,res){
       res.status(200).send('User Updated. '+ ordersUpdatedString)
 
     } catch(err){
-        console.log(err)
+        
         if (err.code == 11000) return res.status(400).send('An User with this email already exists.')
         return res.status(500).send(`message: ${err.message}`)
     }

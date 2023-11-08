@@ -36,7 +36,7 @@ async function deleteProduct(req,res){
     try{
         if(!mongoose.isValidObjectId(req.params.id)) return res.status(400).send('Invalid ObjectId')
         const product = await Product.findOne({_id : req.params.id})
-        console.log(product)
+        
         if (!product) return res.status(400).send('Product with this ObjectId doesnt exist')
         const result = await Product.deleteOne({_id: req.params.id}).exec()
         if (result.acknowledged == true){
