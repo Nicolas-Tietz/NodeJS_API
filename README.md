@@ -233,7 +233,6 @@ Orders can be filtered by products contained and/or users
 
 #### Example
 
-
 ```
 GET localhost:8000/orders?date=2023-11-01&products=ProductName1,ProductName2
 ```
@@ -316,6 +315,6 @@ DELETE localhost:8000/orders/:id
 
 ## <img src="https://github.com/Nicolas-Tietz/JavascriptAdvancedProject/assets/120263952/1a97ff89-6048-4f5c-85ac-df77f18c8578" width='25px'> Contact
 
-From <a href="https://nicolas-tietz.github.io/contact-me/">Portfolio Website</a>
+<a href="https://nicolas-tietz.github.io/contact-me/">Portfolio Website</a>
 
-or Email : nicolastietz48@gmail.com
+Email : nicolastietz48@gmail.com
